@@ -1,0 +1,26 @@
+{
+  "name": "webmention-feed",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A Lit web component for fetching and displaying webmentions",
+  "main": "./dist/webmention-feed.js",
+  "module": "./dist/webmention-feed.js",
+  "types": "./dist/webmention-feed.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/webmention-feed.js",
+      "types": "./dist/webmention-feed.d.ts"
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["webmention", "indieweb", "web-component", "lit"],
+  "devDependencies": {
+    "lit": "^3.0.0",
+    "vite": "^5.0.0"
+  }
+}
