@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
-    "dev": "vite build --watch",
+    "dev": "vite",
+    "watch": "vite build --watch",
     "clean": "rm -rf dist"
   },
   "license": "MIT",

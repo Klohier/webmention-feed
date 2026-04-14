@@ -21,9 +21,12 @@ interface Mention {
  * @attr {string} post-url - Canonical URL of the page to fetch mentions for.
  * @attr {string} endpoint - POST endpoint for submitting new webmentions.
  * @attr {string} fetch-endpoint - GET endpoint for fetching mentions (JF2 format). Defaults to webmention.io.
+ * @attr {number} per-page - Number of replies to show per page. Default: 10.
  *
  * @slot like-icon - Icon before the like count. Default: ♥
  * @slot repost-icon - Icon before the repost count. Default: ↩
+ * @slot prev-label - Label for the previous page button. Default: ← Prev
+ * @slot next-label - Label for the next page button. Default: Next →
  *
  * @cssvar --wm-accent-color
  * @cssvar --wm-text-color
@@ -52,6 +55,12 @@ interface Mention {
  * @csspart reply-link
  * @csspart reply-content
  * @csspart status
+ * @csspart pagination
+ * @csspart page-button
+ * @csspart page-button--prev
+ * @csspart page-button--next
+ * @csspart page-button--disabled
+ * @csspart page-info
  */
 @customElement("webmention-feed")
 export class WebmentionFeed extends LitElement {
@@ -59,10 +68,12 @@ export class WebmentionFeed extends LitElement {
   @property({ type: String, attribute: "endpoint" }) endpoint = "";
   @property({ type: String, attribute: "fetch-endpoint" })
   fetchEndpoint = "https://webmention.io/api/mentions.jf2";
+  @property({ type: Number, attribute: "per-page" }) perPage = 10;
 
   @state() private mentions: Mention[] = [];
   @state() private loading = true;
   @state() private error = false;
+  @state() private currentPage = 1;
 
   connectedCallback() {
     super.connectedCallback();
@@ -71,7 +82,11 @@ export class WebmentionFeed extends LitElement {
 
   updated(changed: Map<string, unknown>) {
     if (changed.has("postUrl") && this.postUrl) {
+      this.currentPage = 1;
       this.fetchMentions();
+    }
+    if (changed.has("perPage")) {
+      this.currentPage = 1;
     }
   }
 
@@ -125,6 +140,15 @@ export class WebmentionFeed extends LitElement {
     );
   }
 
+  private get totalPages() {
+    return Math.max(1, Math.ceil(this.replies.length / this.perPage));
+  }
+
+  private get pagedReplies() {
+    const start = (this.currentPage - 1) * this.perPage;
+    return this.replies.slice(start, start + this.perPage);
+  }
+
   private renderReply(m: Mention) {
     const author = m.author ?? {};
     const date = m.published
@@ -153,6 +177,35 @@ export class WebmentionFeed extends LitElement {
           ? html`<p class="reply-content" part="reply-content">${m.content.text}</p>`
           : nothing}
       </li>
+    `;
+  }
+
+  private renderPagination() {
+    if (this.totalPages <= 1) return nothing;
+
+    const prevDisabled = this.currentPage === 1;
+    const nextDisabled = this.currentPage === this.totalPages;
+
+    return html`
+      <div class="pagination" part="pagination">
+        <button
+          class="page-button"
+          part="page-button page-button--prev ${prevDisabled ? "page-button--disabled" : ""}"
+          ?disabled=${prevDisabled}
+          @click=${() => { this.currentPage -= 1; }}
+        ><slot name="prev-label">← Prev</slot></button>
+
+        <span class="page-info" part="page-info">
+          ${this.currentPage} / ${this.totalPages}
+        </span>
+
+        <button
+          class="page-button"
+          part="page-button page-button--next ${nextDisabled ? "page-button--disabled" : ""}"
+          ?disabled=${nextDisabled}
+          @click=${() => { this.currentPage += 1; }}
+        ><slot name="next-label">Next →</slot></button>
+      </div>
     `;
   }
 
@@ -203,9 +256,12 @@ export class WebmentionFeed extends LitElement {
                     `
                   : nothing}
                 ${this.replies.length > 0
-                  ? html`<ol class="replies" part="replies">
-                      ${this.replies.map((m) => this.renderReply(m))}
-                    </ol>`
+                  ? html`
+                      <ol class="replies" part="replies">
+                        ${this.pagedReplies.map((m) => this.renderReply(m))}
+                      </ol>
+                      ${this.renderPagination()}
+                    `
                   : nothing}
               `}
         </div>
@@ -324,6 +380,23 @@ export class WebmentionFeed extends LitElement {
       font-size: 0.9rem;
       opacity: 0.85;
       line-height: 1.5;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .page-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 0.9rem;
+      opacity: 0.7;
     }
   `;
 }
