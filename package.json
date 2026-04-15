@@ -1,6 +1,6 @@
 {
   "name": "webmention-feed",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "A Lit web component for fetching and displaying webmentions",
   "main": "./dist/webmention-feed.js",
