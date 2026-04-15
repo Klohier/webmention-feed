@@ -12,15 +12,26 @@
       "types": "./dist/webmention-feed.d.ts"
     }
   },
-  "files": ["dist", "src", "LICENSE"],
+  "files": [
+    "dist",
+    "src",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "vite build && tsc --project tsconfig.json --emitDeclarationOnly --outDir dist",
+    "build": "tsc --project tsconfig.json",
     "dev": "vite",
-    "watch": "vite build --watch",
     "clean": "rm -rf dist"
   },
   "license": "MIT",
-  "keywords": ["webmention", "indieweb", "web-component", "lit"],
+  "keywords": [
+    "webmention",
+    "indieweb",
+    "web-component",
+    "lit"
+  ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "devDependencies": {
     "lit": "^3.0.0",
     "typescript": "^5.4.0",

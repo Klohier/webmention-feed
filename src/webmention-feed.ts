@@ -22,6 +22,14 @@ interface Mention {
  * @attr {string} endpoint - POST endpoint for submitting new webmentions.
  * @attr {string} fetch-endpoint - GET endpoint for fetching mentions (JF2 format). Defaults to webmention.io.
  * @attr {number} per-page - Number of replies to show per page. Default: 10.
+ * @attr {string} heading - Text for the section heading. Default: "Webmentions".
+ * @attr {string} loading-text - Text shown while fetching. Default: "Loading mentions…".
+ * @attr {string} empty-text - Text shown when there are no mentions. Default: "No mentions yet."
+ * @attr {string} send-description - Prompt text above the webmention form. Default: "Written a response? Send a webmention:".
+ * @attr {string} submit-label - Submit button text. Default: "Send".
+ * @attr {string} source-label - Accessible label for the URL input. Default: "Your post URL".
+ * @attr {string} anonymous-label - Display name when author name is missing. Default: "Anonymous".
+ * @attr {string} date-locale - BCP 47 locale for formatting reply dates. Default: navigator.language.
  *
  * @slot like-icon - Icon before the like count. Default: ♥
  * @slot repost-icon - Icon before the repost count. Default: ↩
@@ -41,6 +49,7 @@ interface Mention {
  * @csspart base
  * @csspart heading
  * @csspart send-form
+ * @csspart input-label
  * @csspart input
  * @csspart button
  * @csspart list
@@ -68,19 +77,30 @@ export class WebmentionFeed extends LitElement {
   @property({ type: String, attribute: "endpoint" }) endpoint = "";
   @property({ type: String, attribute: "fetch-endpoint" })
   fetchEndpoint = "https://webmention.io/api/mentions.jf2";
+
   @property({ type: Number, attribute: "per-page" }) perPage = 10;
+
+  // Localizable strings
+  @property({ type: String, attribute: "heading" }) heading = "Webmentions";
+  @property({ type: String, attribute: "loading-text" }) loadingText = "Loading mentions…";
+  @property({ type: String, attribute: "empty-text" }) emptyText = "No mentions yet.";
+  @property({ type: String, attribute: "send-description" }) sendDescription = "Written a response? Send a webmention:";
+  @property({ type: String, attribute: "submit-label" }) submitLabel = "Send";
+  @property({ type: String, attribute: "source-label" }) sourceLabel = "Your post URL";
+  @property({ type: String, attribute: "anonymous-label" }) anonymousLabel = "Anonymous";
+  @property({ type: String, attribute: "date-locale" }) dateLocale = typeof navigator !== "undefined" ? navigator.language : "en";
 
   @state() private mentions: Mention[] = [];
   @state() private loading = true;
   @state() private error = false;
   @state() private currentPage = 1;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (this.postUrl) this.fetchMentions();
   }
 
-  updated(changed: Map<string, unknown>) {
+  override updated(changed: Map<string, unknown>) {
     if (changed.has("postUrl") && this.postUrl) {
       this.currentPage = 1;
       this.fetchMentions();
@@ -151,8 +171,9 @@ export class WebmentionFeed extends LitElement {
 
   private renderReply(m: Mention) {
     const author = m.author ?? {};
+    const authorName = author.name ?? this.anonymousLabel;
     const date = m.published
-      ? new Date(m.published).toLocaleDateString("en-US", {
+      ? new Date(m.published).toLocaleDateString(this.dateLocale, {
           year: "numeric",
           month: "short",
           day: "numeric",
@@ -163,15 +184,21 @@ export class WebmentionFeed extends LitElement {
       <li class="reply" part="reply">
         <div class="reply-meta" part="reply-meta">
           ${author.photo
-            ? html`<img src=${author.photo} alt=${author.name ?? ""} class="avatar" part="avatar" width="28" height="28" />`
-            : html`<span class="avatar placeholder" part="avatar"></span>`}
+            ? html`<img src=${author.photo} alt=${authorName} class="avatar" part="avatar" width="28" height="28" />`
+            : html`<span class="avatar placeholder" part="avatar" aria-hidden="true"></span>`}
           <span class="reply-author" part="reply-author">
             ${author.url
-              ? html`<a href=${author.url} rel="noopener noreferrer">${author.name ?? author.url}</a>`
-              : (author.name ?? "Anonymous")}
+              ? html`<a href=${author.url} rel="noopener noreferrer">${authorName}</a>`
+              : authorName}
           </span>
           ${date ? html`<time class="reply-date" part="reply-date">${date}</time>` : nothing}
-          <a href=${m.url} class="reply-link" part="reply-link" rel="noopener noreferrer">→</a>
+          <a
+            href=${m.url}
+            class="reply-link"
+            part="reply-link"
+            rel="noopener noreferrer"
+            aria-label="View ${authorName}'s post"
+          >→</a>
         </div>
         ${m.content?.text
           ? html`<p class="reply-content" part="reply-content">${m.content.text}</p>`
@@ -209,33 +236,36 @@ export class WebmentionFeed extends LitElement {
     `;
   }
 
-  render() {
+  override render() {
     return html`
       <section part="base">
-        <h2 part="heading">Webmentions</h2>
+        <h2 part="heading">${this.heading}</h2>
 
         <div class="send" part="send-form">
-          <p>Written a response? Send a webmention:</p>
+          <p>${this.sendDescription}</p>
           <form action=${this.endpoint} method="post">
             <input type="hidden" name="target" .value=${this.postUrl} />
-            <input
-              type="url"
-              name="source"
-              placeholder="https://your-post-url.com"
-              required
-              part="input"
-            />
-            <button type="submit" part="button">Send</button>
+            <label class="input-label" part="input-label">
+              <span class="visually-hidden">${this.sourceLabel}</span>
+              <input
+                type="url"
+                name="source"
+                placeholder="https://your-post-url.com"
+                required
+                part="input"
+              />
+            </label>
+            <button type="submit" part="button">${this.submitLabel}</button>
           </form>
         </div>
 
         <div class="list" part="list">
           ${this.loading
-            ? html`<p class="status" part="status">Loading mentions…</p>`
+            ? html`<p class="status" part="status">${this.loadingText}</p>`
             : this.error
             ? nothing
             : this.mentions.length === 0
-            ? html`<p class="status" part="status">No mentions yet.</p>`
+            ? html`<p class="status" part="status">${this.emptyText}</p>`
             : html`
                 ${this.likes.length > 0 || this.reposts.length > 0
                   ? html`
@@ -269,14 +299,14 @@ export class WebmentionFeed extends LitElement {
     `;
   }
 
-  static styles = css`
+  static override styles = css`
     :host {
       --wm-text-color: inherit;
       --wm-accent-color: #2563eb;
       --wm-border-color: #6b7280;
       --wm-reply-bg: transparent;
       --wm-reply-border-color: #d1d5db;
-      --wm-input-bg: #ffffff;
+      --wm-input-bg: Canvas;
       --wm-input-border-color: #9ca3af;
       --wm-avatar-bg: #9ca3af;
       --wm-button-text-color: #ffffff;
@@ -303,6 +333,24 @@ export class WebmentionFeed extends LitElement {
       margin-bottom: 2rem;
     }
 
+    .input-label {
+      flex: 1;
+      min-width: 0;
+      display: contents;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     input[type="url"] {
       flex: 1;
       min-width: 0;
@@ -324,6 +372,12 @@ export class WebmentionFeed extends LitElement {
       font-size: 0.9rem;
       font-family: inherit;
       cursor: pointer;
+    }
+
+    button:focus-visible,
+    input[type="url"]:focus-visible {
+      outline: 2px solid var(--wm-accent-color);
+      outline-offset: 2px;
     }
 
     .status { font-size: 0.9rem; opacity: 0.6; }
@@ -374,6 +428,11 @@ export class WebmentionFeed extends LitElement {
     .reply-date { font-size: 0.8rem; opacity: 0.6; margin-left: auto; }
 
     .reply-link { font-size: 0.85rem; color: var(--wm-accent-color); text-decoration: none; }
+    .reply-link:focus-visible {
+      outline: 2px solid var(--wm-accent-color);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
 
     .reply-content {
       margin: 0;

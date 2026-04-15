@@ -1,18 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "useDefineForClassFields": false,
-    "experimentalDecorators": true,
-    "strict": true,
+    "module": "ES2020",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "declaration": true,
     "declarationMap": true,
-    "skipLibCheck": true,
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "sourceMap": true,
+    "inlineSources": true,
     "outDir": "dist",
-    "declarationDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts"]
 }
