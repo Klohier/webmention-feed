@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webmention-feed dev</title>
+    <script>
+      const mockMentions = [
+        { "wm-property": "like-of", url: "https://example.com/1", author: { name: "Alice", url: "https://alice.example.com" } },
+        { "wm-property": "like-of", url: "https://example.com/2", author: { name: "Bob", url: "https://bob.example.com" } },
+        { "wm-property": "repost-of", url: "https://example.com/3", author: { name: "Carol", url: "https://carol.example.com" } },
+        { "wm-property": "in-reply-to", url: "https://example.com/4", published: "2026-01-10T12:00:00Z", author: { name: "Dave", url: "https://dave.example.com" }, content: { text: "Really enjoyed this post, thanks for sharing!" } },
+        { "wm-property": "in-reply-to", url: "https://example.com/5", published: "2026-01-11T08:30:00Z", author: { name: "Eve", url: "https://eve.example.com" }, content: { text: "Great writeup. I had a similar experience last year." } },
+        { "wm-property": "mention-of", url: "https://example.com/6", published: "2026-01-12T15:00:00Z", author: { name: "Frank" }, content: { text: "Mentioned this in my weekly digest." } },
+        { "wm-property": "in-reply-to", url: "https://example.com/7", published: "2026-01-13T09:00:00Z", author: { name: "Grace", url: "https://grace.example.com" }, content: { text: "Do you have any follow-up posts planned on this topic?" } },
+        { "wm-property": "in-reply-to", url: "https://example.com/8", published: "2026-01-14T11:00:00Z", author: { name: "Hana", url: "https://hana.example.com" }, content: { text: "Bookmarked for later, this is really useful." } },
+        { "wm-property": "in-reply-to", url: "https://example.com/9", published: "2026-01-15T14:00:00Z", author: { name: "Ivan", url: "https://ivan.example.com" }, content: { text: "I disagree with the second point but the rest is solid." } },
+        { "wm-property": "in-reply-to", url: "https://example.com/10", published: "2026-01-16T10:00:00Z", author: { name: "Julia", url: "https://julia.example.com" }, content: { text: "Shared this with my team." } },
+        { "wm-property": "in-reply-to", url: "https://example.com/11", published: "2026-01-17T16:00:00Z", author: { name: "Karl" }, content: { text: "Another great one from this blog." } },
+        { "wm-property": "in-reply-to", url: "https://example.com/12", published: "2026-01-18T13:00:00Z", author: { name: "Lena", url: "https://lena.example.com" }, content: { text: "This changed how I think about the problem." } },
+      ];
+
+      const originalFetch = window.fetch;
+      window.fetch = (input) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("webmention.io")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ children: mockMentions }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }),
+          );
+        }
+        return originalFetch(input);
+      };
+    </script>
+    <script type="module" src="/src/webmention-feed.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 640px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>webmention-feed preview</h1>
+
+    <webmention-feed
+      post-url="https://webmention.rocks/test/1"
+      per-page="5"
+    ></webmention-feed>
+  </body>
+</html>
