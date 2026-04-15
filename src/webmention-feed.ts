@@ -60,6 +60,7 @@ interface Mention {
  * @csspart reply-meta
  * @csspart avatar
  * @csspart reply-author
+ * @csspart reply-author-link
  * @csspart reply-date
  * @csspart reply-link
  * @csspart reply-content
@@ -188,7 +189,7 @@ export class WebmentionFeed extends LitElement {
             : html`<span class="avatar placeholder" part="avatar" aria-hidden="true"></span>`}
           <span class="reply-author" part="reply-author">
             ${author.url
-              ? html`<a href=${author.url} rel="noopener noreferrer">${authorName}</a>`
+              ? html`<a href=${author.url} rel="noopener noreferrer" part="reply-author-link">${authorName}</a>`
               : authorName}
           </span>
           ${date ? html`<time class="reply-date" part="reply-date">${date}</time>` : nothing}
@@ -374,10 +375,18 @@ export class WebmentionFeed extends LitElement {
       cursor: pointer;
     }
 
+    button:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
     button:focus-visible,
     input[type="url"]:focus-visible {
       outline: 2px solid var(--wm-accent-color);
       outline-offset: 2px;
+    }
+
+    input[type="url"]:hover {
+      border-color: var(--wm-accent-color);
     }
 
     .status { font-size: 0.9rem; opacity: 0.6; }
@@ -424,10 +433,17 @@ export class WebmentionFeed extends LitElement {
 
     .reply-author { font-size: 0.9rem; font-weight: 600; }
     .reply-author a { color: var(--wm-accent-color); text-decoration: none; }
+    .reply-author a:hover { text-decoration: underline; }
+    .reply-author a:focus-visible {
+      outline: 2px solid var(--wm-accent-color);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
 
     .reply-date { font-size: 0.8rem; opacity: 0.6; margin-left: auto; }
 
     .reply-link { font-size: 0.85rem; color: var(--wm-accent-color); text-decoration: none; }
+    .reply-link:hover { text-decoration: underline; }
     .reply-link:focus-visible {
       outline: 2px solid var(--wm-accent-color);
       outline-offset: 2px;

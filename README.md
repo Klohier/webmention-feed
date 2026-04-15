@@ -54,7 +54,7 @@ npm install webmention-feed
 
 Target internals with `webmention-feed::part(name)`.
 
-`base` · `heading` · `send-form` · `input-label` · `input` · `button` · `list` · `reactions` · `stat` · `replies` · `reply` · `reply-meta` · `avatar` · `reply-author` · `reply-date` · `reply-link` · `reply-content` · `status` · `pagination` · `page-button` · `page-button--prev` · `page-button--next` · `page-button--disabled` · `page-info`
+`base` · `heading` · `send-form` · `input-label` · `input` · `button` · `list` · `reactions` · `stat` · `replies` · `reply` · `reply-meta` · `avatar` · `reply-author` · `reply-author-link` · `reply-date` · `reply-link` · `reply-content` · `status` · `pagination` · `page-button` · `page-button--prev` · `page-button--next` · `page-button--disabled` · `page-info`
 
 ```css
 webmention-feed::part(pagination) {
