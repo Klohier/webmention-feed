@@ -1,6 +1,6 @@
 {
   "name": "webmention-feed",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "description": "A Lit web component for fetching and displaying webmentions",
   "author": "Keiji Lohier",
