@@ -5,8 +5,10 @@ A Lit web component that fetches and displays [webmentions](https://indieweb.org
 ## Install
 
 ```bash
-npm install webmention-feed
+npm install webmention-feed lit
 ```
+
+`lit` is a peer dependency and must be installed alongside the package.
 
 ## Setup with webmention.io
 
@@ -24,7 +26,7 @@ npm install webmention-feed
 ```
 
 - `post-url` — the specific page to fetch mentions for
-- `endpoint` — where the send form POSTs to (your webmention.io inbox)
+- `endpoint` — where the send form POSTs to (your webmention.io inbox). If omitted, the send form is hidden entirely
 - `fetch-endpoint` — no need to set this, defaults to webmention.io's API
 
 The component automatically fetches mentions for both `yoursite.com` and `www.yoursite.com` to catch both URL variants.
@@ -124,6 +126,49 @@ Replies are paginated automatically when there are more than `per-page` entries.
   <span slot="prev-label">← Previous</span>
   <span slot="next-label">Next →</span>
 </webmention-feed>
+```
+
+## Events
+
+All events bubble and are composed, so they can be listened to on any ancestor element.
+
+| Event | Detail | Description |
+|---|---|---|
+| `wm-load` | `{ mentions, likeCount, repostCount, replyCount }` | Fired when mentions finish loading |
+| `wm-error` | — | Fired when the fetch fails |
+| `wm-page-change` | `{ page, totalPages }` | Fired when the user navigates to a different page |
+
+```js
+const feed = document.querySelector('webmention-feed');
+
+feed.addEventListener('wm-load', (e) => {
+  console.log(`Loaded ${e.detail.replyCount} replies`);
+});
+
+feed.addEventListener('wm-error', () => {
+  console.warn('Failed to load webmentions');
+});
+
+feed.addEventListener('wm-page-change', (e) => {
+  console.log(`Page ${e.detail.page} of ${e.detail.totalPages}`);
+});
+```
+
+## TypeScript
+
+Types are included. Import the class directly for subclassing or type annotations:
+
+```ts
+import { WebmentionFeed } from 'webmention-feed';
+
+const feed = document.querySelector('webmention-feed') as WebmentionFeed;
+```
+
+The element is also registered in `HTMLElementTagNameMap`, so `querySelector` and `createElement` return the correct type automatically:
+
+```ts
+// Automatically typed as WebmentionFeed
+const feed = document.querySelector('webmention-feed');
 ```
 
 ## Localisation
