@@ -3,6 +3,15 @@
   "version": "0.3.1",
   "type": "module",
   "description": "A Lit web component for fetching and displaying webmentions",
+  "author": "Keiji Lohier",
+  "homepage": "https://github.com/klohier/webmention-feed#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/klohier/webmention-feed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/klohier/webmention-feed/issues"
+  },
   "main": "./dist/webmention-feed.js",
   "module": "./dist/webmention-feed.js",
   "types": "./dist/webmention-feed.d.ts",
@@ -28,6 +37,9 @@
     "indieweb",
     "web-component",
     "lit"
+  ],
+  "sideEffects": [
+    "./dist/webmention-feed.js"
   ],
   "peerDependencies": {
     "lit": "^3.0.0"
