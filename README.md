@@ -8,6 +8,37 @@ A Lit web component that fetches and displays [webmentions](https://indieweb.org
 npm install webmention-feed
 ```
 
+## Setup with webmention.io
+
+1. Sign in at [webmention.io](https://webmention.io) with your site URL
+2. Add this to your site's `<head>`:
+```html
+<link rel="webmention" href="https://webmention.io/yoursite.com/webmention" />
+```
+3. Add the component to each post page, setting `post-url` to the canonical URL of that page:
+```html
+<webmention-feed
+  post-url="https://yoursite.com/blog/my-post/"
+  endpoint="https://webmention.io/yoursite.com/webmention"
+></webmention-feed>
+```
+
+- `post-url` — the specific page to fetch mentions for
+- `endpoint` — where the send form POSTs to (your webmention.io inbox)
+- `fetch-endpoint` — no need to set this, defaults to webmention.io's API
+
+The component automatically fetches mentions for both `yoursite.com` and `www.yoursite.com` to catch both URL variants.
+
+If you self-host your own webmention endpoint, you can point the component at it via `fetch-endpoint` as long as it returns [JF2](https://jf2.spec.indieweb.org/) format:
+
+```html
+<webmention-feed
+  post-url="https://yoursite.com/blog/my-post/"
+  endpoint="https://yoursite.com/webmention"
+  fetch-endpoint="https://yoursite.com/api/mentions.jf2"
+></webmention-feed>
+```
+
 ## Usage
 
 ```html
