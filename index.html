@@ -51,5 +51,20 @@
       post-url="https://webmention.rocks/test/1"
       per-page="5"
     ></webmention-feed>
+  <script type="module">
+    const feed = document.querySelector("webmention-feed");
+
+    feed.addEventListener("wm-load", (e) => {
+      console.log("wm-load", e.detail);
+    });
+
+    feed.addEventListener("wm-error", () => {
+      console.warn("wm-error: fetch failed");
+    });
+
+    feed.addEventListener("wm-page-change", (e) => {
+      console.log("wm-page-change", e.detail);
+    });
+  </script>
   </body>
 </html>

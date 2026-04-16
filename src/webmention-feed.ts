@@ -31,6 +31,10 @@ interface Mention {
  * @attr {string} anonymous-label - Display name when author name is missing. Default: "Anonymous".
  * @attr {string} date-locale - BCP 47 locale for formatting reply dates. Default: navigator.language.
  *
+ * @fires {CustomEvent<{ mentions: Mention[], likeCount: number, repostCount: number, replyCount: number }>} wm-load - Fired when mentions finish loading.
+ * @fires {CustomEvent<void>} wm-error - Fired when the fetch fails.
+ * @fires {CustomEvent<{ page: number, totalPages: number }>} wm-page-change - Fired when the user navigates to a different page.
+ *
  * @slot like-icon - Icon before the like count. Default: ♥
  * @slot repost-icon - Icon before the repost count. Default: ↩
  * @slot prev-label - Label for the previous page button. Default: ← Prev
@@ -92,7 +96,7 @@ export class WebmentionFeed extends LitElement {
   @property({ type: String, attribute: "date-locale" }) dateLocale = typeof navigator !== "undefined" ? navigator.language : "en";
 
   @state() private mentions: Mention[] = [];
-  @state() private loading = true;
+  @state() private loading = false;
   @state() private error = false;
   @state() private currentPage = 1;
 
@@ -142,8 +146,19 @@ export class WebmentionFeed extends LitElement {
         seen.add(m.url);
         return true;
       });
+      this.dispatchEvent(new CustomEvent("wm-load", {
+        bubbles: true,
+        composed: true,
+        detail: {
+          mentions: this.mentions,
+          likeCount: this.likes.length,
+          repostCount: this.reposts.length,
+          replyCount: this.replies.length,
+        },
+      }));
     } catch {
       this.error = true;
+      this.dispatchEvent(new CustomEvent("wm-error", { bubbles: true, composed: true }));
     } finally {
       this.loading = false;
     }
@@ -220,7 +235,14 @@ export class WebmentionFeed extends LitElement {
           class="page-button"
           part="page-button page-button--prev ${prevDisabled ? "page-button--disabled" : ""}"
           ?disabled=${prevDisabled}
-          @click=${() => { this.currentPage -= 1; }}
+          @click=${() => {
+            this.currentPage -= 1;
+            this.dispatchEvent(new CustomEvent("wm-page-change", {
+              bubbles: true,
+              composed: true,
+              detail: { page: this.currentPage, totalPages: this.totalPages },
+            }));
+          }}
         ><slot name="prev-label">← Prev</slot></button>
 
         <span class="page-info" part="page-info">
@@ -231,17 +253,27 @@ export class WebmentionFeed extends LitElement {
           class="page-button"
           part="page-button page-button--next ${nextDisabled ? "page-button--disabled" : ""}"
           ?disabled=${nextDisabled}
-          @click=${() => { this.currentPage += 1; }}
+          @click=${() => {
+            this.currentPage += 1;
+            this.dispatchEvent(new CustomEvent("wm-page-change", {
+              bubbles: true,
+              composed: true,
+              detail: { page: this.currentPage, totalPages: this.totalPages },
+            }));
+          }}
         ><slot name="next-label">Next →</slot></button>
       </div>
     `;
   }
 
   override render() {
-    return html`
-      <section part="base">
-        <h2 part="heading">${this.heading}</h2>
+    const headingId = "wm-heading";
 
+    return html`
+      <section part="base" aria-labelledby=${headingId}>
+        <h2 id=${headingId} part="heading">${this.heading}</h2>
+
+        ${this.endpoint ? html`
         <div class="send" part="send-form">
           <p>${this.sendDescription}</p>
           <form action=${this.endpoint} method="post">
@@ -258,9 +290,9 @@ export class WebmentionFeed extends LitElement {
             </label>
             <button type="submit" part="button">${this.submitLabel}</button>
           </form>
-        </div>
+        </div>` : nothing}
 
-        <div class="list" part="list">
+        <div class="list" part="list" aria-live="polite" aria-atomic="true">
           ${this.loading
             ? html`<p class="status" part="status">${this.loadingText}</p>`
             : this.error
@@ -288,7 +320,7 @@ export class WebmentionFeed extends LitElement {
                   : nothing}
                 ${this.replies.length > 0
                   ? html`
-                      <ol class="replies" part="replies">
+                      <ol class="replies" part="replies" aria-label="${this.heading} replies">
                         ${this.pagedReplies.map((m) => this.renderReply(m))}
                       </ol>
                       ${this.renderPagination()}
