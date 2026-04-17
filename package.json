@@ -23,13 +23,15 @@
   },
   "files": [
     "dist",
+    "cdn",
     "src",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.json",
+    "build:cdn": "vite build --mode cdn",
     "dev": "vite",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist cdn"
   },
   "license": "MIT",
   "keywords": [
@@ -39,7 +41,8 @@
     "lit"
   ],
   "sideEffects": [
-    "./dist/webmention-feed.js"
+    "./dist/webmention-feed.js",
+    "./cdn/webmention-feed.js"
   ],
   "peerDependencies": {
     "lit": "^3.0.0"

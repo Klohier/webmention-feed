@@ -6,6 +6,19 @@ A Lit web component that fetches and displays [webmentions](https://indieweb.org
 
 See it in action: [First npm package — keijilohier.com](https://keijilohier.com/blogs/first-npm-package/)
 
+## CDN (no build step)
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmention-feed/cdn/webmention-feed.js"></script>
+
+<webmention-feed
+  post-url="https://yoursite.com/blog/my-post"
+  endpoint="https://webmention.io/yoursite.com/webmention"
+></webmention-feed>
+```
+
+Lit is bundled in — no extra dependencies needed.
+
 ## Install
 
 ```bash
