@@ -2,6 +2,10 @@
 
 A Lit web component that fetches and displays [webmentions](https://indieweb.org/Webmention) for a given page URL.
 
+## Examples
+
+See it in action: [First npm package — keijilohier.com](https://keijilohier.com/blogs/first-npm-package/)
+
 ## Install
 
 ```bash
